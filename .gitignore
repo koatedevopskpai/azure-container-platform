@@ -1,0 +1,72 @@
+# ── Terraform ──────────────────────────────────────────────────────
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.terraform.lock.hcl
+.terraform/
+crash.log
+crash.*.log
+
+# ── Secrets & Credentials ──────────────────────────────────────────
+*.tfvars
+!terraform.tfvars.example
+*.pem
+*.key
+*.cert
+*.secret
+.secrets.baseline
+
+# ── IDE & Editors ──────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.user
+
+# ── OS ─────────────────────────────────────────────────────────────
+Thumbs.db
+desktop.ini
+.DS_Store
+*.log
+
+# ── Tooling ────────────────────────────────────────────────────────
+.infracost/
+.infracost-usage.yml
+*.html
+*.cost*.json
+
+# ── Python ─────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.env
+.venv
+venv/
+
+# ── Node / JavaScript ──────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ── Go ─────────────────────────────────────────────────────────────
+*.test
+*.out
+vendor/
+go.work
+go.work.sum
+
+# ── Docker ─────────────────────────────────────────────────────────
+.docker/
+*.tar
+
+# ── Generated Docs ─────────────────────────────────────────────────
+docs/generated/
+*.generated.md

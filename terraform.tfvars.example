@@ -1,0 +1,101 @@
+# ── Cluster Configuration ──────────────────────────────────────────
+cluster_name        = "aks-secondwave-prod-01"
+resource_group_name = "rg-aks-secondwave-prod"
+location            = "uksouth"
+kubernetes_version  = "1.30"
+
+# ── Azure AD ───────────────────────────────────────────────────────
+aks_admin_group_name = "AKS Cluster Admins"
+
+# ── Networking ─────────────────────────────────────────────────────
+vnet_subnet_id     = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-networking-prod/providers/Microsoft.Network/virtualNetworks/vnet-secondwave-prod/subnets/snet-aks-prod"
+network_plugin_mode = "cilium"
+pod_cidr           = "10.244.0.0/16"
+service_cidr       = "10.245.0.0/16"
+dns_service_ip     = "10.245.0.10"
+
+# ── Node Pools ─────────────────────────────────────────────────────
+node_pools = {
+  system = {
+    vm_size        = "Standard_D4s_v5"
+    node_count     = 3
+    min_count      = 1
+    max_count      = 5
+    node_taints    = ["CriticalAddonsOnly=true:NoSchedule"]
+    labels         = { pool = "system" }
+    max_pods       = 50
+  }
+  user = {
+    vm_size        = "Standard_D8s_v5"
+    node_count     = 3
+    min_count      = 1
+    max_count      = 10
+    labels         = { pool = "user" }
+    max_pods       = 50
+  }
+  ml = {
+    vm_size                  = "Standard_NC6s_v3"
+    node_count               = 0
+    min_count                = 0
+    max_count                = 5
+    priority                 = "Spot"
+    eviction_policy          = "Delete"
+    spot_max_price           = -1
+    node_taints              = ["kubernetes.azure.com/scalesetpriority=spot:NoSchedule"]
+    labels                   = { pool = "ml", workload = "inference" }
+    enable_node_public_ip    = false
+    max_pods                 = 50
+  }
+}
+
+# ── Workload Identity ──────────────────────────────────────────────
+workload_identities = {
+  app-api = {
+    namespace       = "api"
+    service_account = "api-sa"
+    role_assignments = {
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-data-prod/providers/Microsoft.Storage/storageAccounts/sasecondwavedata" = "Storage Blob Data Contributor"
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-data-prod/providers/Microsoft.KeyVault/vaults/kv-secondwave-prod"      = "Key Vault Secrets User"
+    }
+  }
+  app-events = {
+    namespace       = "events"
+    service_account = "events-sa"
+    role_assignments = {
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-data-prod/providers/Microsoft.ServiceBus/namespaces/sb-secondwave-prod" = "Azure Service Bus Data Sender"
+    }
+  }
+}
+
+# ── GitOps ─────────────────────────────────────────────────────────
+gitops_tool       = "argocd"
+gitops_repo_url   = "git@github.com:secondwave/gitops-prod.git"
+gitops_repo_path  = "clusters/production"
+
+# ── Ingress / Domain ──────────────────────────────────────────────
+domain                      = "secondwave-insurance.com"
+cert_manager_email          = "platform@secondwave-insurance.com"
+ingress_load_balancer_ip    = "20.XX.XX.XX"
+application_gateway_id      = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-networking-prod/providers/Microsoft.Network/applicationGateways/agw-secondwave-prod"
+application_gateway_name    = "agw-secondwave-prod"
+application_gateway_rg      = "rg-networking-prod"
+
+# ── Key Vault ──────────────────────────────────────────────────────
+key_vault_name  = "kv-secondwave-prod"
+key_vault_rg    = "rg-security-prod"
+
+# ── Observability ──────────────────────────────────────────────────
+open_telemetry_sampler_ratio = 0.1
+
+# ── Defender ───────────────────────────────────────────────────────
+enable_defender_for_containers = true
+defender_workspace_id          = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-security-prod/providers/Microsoft.OperationalInsights/workspaces/log-secondwave-prod"
+
+# ── Tags ───────────────────────────────────────────────────────────
+tags = {
+  Environment = "production"
+  ManagedBy   = "terraform"
+  Platform    = "aks-container-platform"
+  SecondWave  = "insurer-migration"
+  CostCenter  = "platform-engineering"
+}
