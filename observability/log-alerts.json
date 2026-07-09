@@ -1,0 +1,168 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workspaceName": { "type": "string" },
+    "actionGroupId": { "type": "string" }
+  },
+  "variables": {
+    "alertSeverity": 1,
+    "frequency": 5,
+    "timeWindow": 15,
+    "threshold": 0
+  },
+  "resources": [
+    {
+      "name": "[concat(parameters('workspaceName'), '/pod-crash-loop-alert')]",
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches/schedules/alertRules",
+      "apiVersion": "2020-08-01",
+      "properties": {
+        "displayName": "Pod CrashLoopBackOff Alert",
+        "description": "Alert when pods enter CrashLoopBackOff state indicating application or configuration errors",
+        "severity": "[variables('alertSeverity')]",
+        "enabled": true,
+        "query": "KubePodInventory | where TimeGenerated > ago(5m) | where PodStatus in ('CrashLoopBackOff', 'Error', 'Init:CrashLoopBackOff') | summarize CrashCount = count() by ClusterName, Namespace, PodName, PodStatus | where CrashCount > 0",
+        "queryType": "ResultCount",
+        "frequency": "[variables('frequency')]",
+        "timeWindow": "[variables('timeWindow')]",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": "[variables('threshold')]",
+        "actionGroupIds": [ "[parameters('actionGroupId')]" ],
+        "suppressAlerts": false
+      }
+    },
+    {
+      "name": "[concat(parameters('workspaceName'), '/oom-killed-alert')]",
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches/schedules/alertRules",
+      "apiVersion": "2020-08-01",
+      "properties": {
+        "displayName": "OOMKilled Container Alert",
+        "description": "Alert when containers are killed due to out-of-memory conditions — increase memory limits or investigate memory leak",
+        "severity": 2,
+        "enabled": true,
+        "query": "KubePodInventory | where TimeGenerated > ago(10m) | where PodStatus contains 'OOMKilled' or ContainerStatus contains 'OOMKilled' | project TimeGenerated, ClusterName, Namespace, PodName, ContainerName, PodStatus | order by TimeGenerated desc",
+        "queryType": "ResultCount",
+        "frequency": 10,
+        "timeWindow": 10,
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "actionGroupIds": [ "[parameters('actionGroupId')]" ],
+        "suppressAlerts": false
+      }
+    },
+    {
+      "name": "[concat(parameters('workspaceName'), '/waf-block-spike-alert')]",
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches/schedules/alertRules",
+      "apiVersion": "2020-08-01",
+      "properties": {
+        "displayName": "WAF Blocked Requests Spike Alert",
+        "description": "Alert when WAF blocked requests spike > 500% above baseline, indicating possible attack or misconfigured rule",
+        "severity": 1,
+        "enabled": true,
+        "query": "AzureDiagnostics | where ResourceType == 'APPLICATIONGATEWAYS' | where OperationName == 'ApplicationGatewayAccess' | where requestUri_s != '/healthz' | where httpStatus_d >= 400 | summarize BlockedCount = count() by bin(TimeGenerated, 5m), Resource | order by BlockedCount desc | where BlockedCount > 100",
+        "queryType": "ResultCount",
+        "frequency": 5,
+        "timeWindow": 15,
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 100,
+        "actionGroupIds": [ "[parameters('actionGroupId')]" ],
+        "suppressAlerts": false
+      }
+    },
+    {
+      "name": "[concat(parameters('workspaceName'), '/node-not-ready-alert')]",
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches/schedules/alertRules",
+      "apiVersion": "2020-08-01",
+      "properties": {
+        "displayName": "AKS Node Not Ready Alert",
+        "description": "Alert when AKS nodes are in NotReady state for more than 10 minutes",
+        "severity": 1,
+        "enabled": true,
+        "query": "KubeNodeInventory | where TimeGenerated > ago(10m) | where Status != 'Ready' | project TimeGenerated, ClusterName, NodeName, Status, Conditions | order by TimeGenerated desc",
+        "queryType": "ResultCount",
+        "frequency": 10,
+        "timeWindow": 10,
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "actionGroupIds": [ "[parameters('actionGroupId')]" ],
+        "suppressAlerts": false
+      }
+    },
+    {
+      "name": "[concat(parameters('workspaceName'), '/image-pull-failure-alert')]",
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches/schedules/alertRules",
+      "apiVersion": "2020-08-01",
+      "properties": {
+        "displayName": "Image Pull Failure Alert",
+        "description": "Alert on ImagePullBackOff / ErrImagePull events — indicates ACR connectivity issues or missing images",
+        "severity": 2,
+        "enabled": true,
+        "query": "KubePodInventory | where TimeGenerated > ago(10m) | where PodStatus in ('ImagePullBackOff', 'ErrImagePull', 'Init:ImagePullBackOff') | project TimeGenerated, ClusterName, Namespace, PodName, NodeName, PodStatus",
+        "queryType": "ResultCount",
+        "frequency": 10,
+        "timeWindow": 10,
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "actionGroupIds": [ "[parameters('actionGroupId')]" ],
+        "suppressAlerts": false
+      }
+    },
+    {
+      "name": "[concat(parameters('workspaceName'), '/keda-scale-failure-alert')]",
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches/schedules/alertRules",
+      "apiVersion": "2020-08-01",
+      "properties": {
+        "displayName": "KEDA Scaling Failure Alert",
+        "description": "Alert when KEDA ScaledObject fails to scale — check event source connectivity or ScaledObject configuration",
+        "severity": 2,
+        "enabled": true,
+        "query": "KubeEvents | where TimeGenerated > ago(10m) | where Reason in ('FailedScaleUp', 'FailedGetScale', 'FailedResolve') | where EventObject contains 'scaledobject' or EventObject contains 'keda' | project TimeGenerated, ClusterName, Namespace, Name, Reason, Message",
+        "queryType": "ResultCount",
+        "frequency": 10,
+        "timeWindow": 10,
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "actionGroupIds": [ "[parameters('actionGroupId')]" ],
+        "suppressAlerts": false
+      }
+    },
+    {
+      "name": "[concat(parameters('workspaceName'), '/certificate-expiry-alert')]",
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches/schedules/alertRules",
+      "apiVersion": "2020-08-01",
+      "properties": {
+        "displayName": "Certificate Expiry Alert (14 days)",
+        "description": "Alert when cert-manager managed certificates are expiring within 14 days",
+        "severity": 2,
+        "enabled": true,
+        "query": "KubeEvents | where TimeGenerated > ago(1d) | where Reason == 'CertExpiring' | project TimeGenerated, ClusterName, Namespace, Name, Message | where Message contains '14 day'",
+        "queryType": "ResultCount",
+        "frequency": 1440,
+        "timeWindow": 1440,
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "actionGroupIds": [ "[parameters('actionGroupId')]" ],
+        "suppressAlerts": false
+      }
+    },
+    {
+      "name": "[concat(parameters('workspaceName'), '/defender-high-severity-alert')]",
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches/schedules/alertRules",
+      "apiVersion": "2020-08-01",
+      "properties": {
+        "displayName": "Microsoft Defender High Severity Alert",
+        "description": "Alert on high-severity Microsoft Defender for Containers findings",
+        "severity": 1,
+        "enabled": true,
+        "query": "SecurityAlert | where TimeGenerated > ago(1h) | where AlertSeverity == 'High' | where AlertType contains 'Kubernetes' or AlertType contains 'Container' or AlertType contains 'Secret' | project TimeGenerated, AlertDisplayName, AlertSeverity, CompromisedEntity, ExtendedProperties",
+        "queryType": "ResultCount",
+        "frequency": 5,
+        "timeWindow": 60,
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "actionGroupIds": [ "[parameters('actionGroupId')]" ],
+        "suppressAlerts": false
+      }
+    }
+  ]
+}

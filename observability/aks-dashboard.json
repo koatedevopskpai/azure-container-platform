@@ -1,0 +1,295 @@
+{
+  "properties": {
+    "lenses": [
+      {
+        "order": 0,
+        "parts": [
+          {
+            "position": { "x": 0, "y": 0, "rowSpan": 2, "colSpan": 2 },
+            "metadata": {
+              "type": "Extension/HubsExtension/PartType/MonitorChartPart",
+              "settings": {
+                "content": {
+                  "options": {
+                    "chart": {
+                      "metrics": [
+                        { "resourceMetadata": { "id": "${aks_id}" }, "name": "kube_node_status_condition", "aggregationType": 4, "namespace": "microsoft.containerservice/managedclusters", "metricVisualization": { "displayName": "Node Status" } }
+                      ],
+                      "title": "Cluster Node Status",
+                      "titleKind": 1,
+                      "visualization": { "chartType": 2, "legendVisualization": { "isVisible": true, "position": 2 } }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "position": { "x": 2, "y": 0, "rowSpan": 2, "colSpan": 2 },
+            "metadata": {
+              "type": "Extension/HubsExtension/PartType/MonitorChartPart",
+              "settings": {
+                "content": {
+                  "options": {
+                    "chart": {
+                      "metrics": [
+                        { "resourceMetadata": { "id": "${aks_id}" }, "name": "kube_pod_status_phase", "aggregationType": 4, "namespace": "microsoft.containerservice/managedclusters", "metricVisualization": { "displayName": "Pod Status" }, "splitBy": "phase" }
+                      ],
+                      "title": "Pod Status by Phase",
+                      "titleKind": 1,
+                      "visualization": { "chartType": 3, "legendVisualization": { "isVisible": true, "position": 2 } }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "position": { "x": 4, "y": 0, "rowSpan": 2, "colSpan": 2 },
+            "metadata": {
+              "type": "Extension/HubsExtension/PartType/MonitorChartPart",
+              "settings": {
+                "content": {
+                  "options": {
+                    "chart": {
+                      "metrics": [
+                        { "resourceMetadata": { "id": "${aks_id}" }, "name": "kube_node_status_allocatable_cpu_cores", "aggregationType": 1, "namespace": "microsoft.containerservice/managedclusters", "metricVisualization": { "displayName": "CPU Cores" } },
+                        { "resourceMetadata": { "id": "${aks_id}" }, "name": "kube_node_status_capacity_cpu_cores", "aggregationType": 1, "namespace": "microsoft.containerservice/managedclusters", "metricVisualization": { "displayName": "CPU Cores Capacity" } }
+                      ],
+                      "title": "Cluster CPU",
+                      "titleKind": 1,
+                      "visualization": { "chartType": 2, "legendVisualization": { "isVisible": true, "position": 2 } }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "position": { "x": 6, "y": 0, "rowSpan": 2, "colSpan": 2 },
+            "metadata": {
+              "type": "Extension/HubsExtension/PartType/MonitorChartPart",
+              "settings": {
+                "content": {
+                  "options": {
+                    "chart": {
+                      "metrics": [
+                        { "resourceMetadata": { "id": "${aks_id}" }, "name": "kube_node_status_allocatable_memory_bytes", "aggregationType": 1, "namespace": "microsoft.containerservice/managedclusters", "metricVisualization": { "displayName": "Memory" } },
+                        { "resourceMetadata": { "id": "${aks_id}" }, "name": "kube_node_status_capacity_memory_bytes", "aggregationType": 1, "namespace": "microsoft.containerservice/managedclusters", "metricVisualization": { "displayName": "Memory Capacity" } }
+                      ],
+                      "title": "Cluster Memory",
+                      "titleKind": 1,
+                      "visualization": { "chartType": 2, "legendVisualization": { "isVisible": true, "position": 2 } }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "position": { "x": 0, "y": 2, "rowSpan": 2, "colSpan": 2 },
+            "metadata": {
+              "type": "Extension/HubsExtension/PartType/MonitorChartPart",
+              "settings": {
+                "content": {
+                  "options": {
+                    "chart": {
+                      "metrics": [
+                        { "resourceMetadata": { "id": "${aks_id}" }, "name": "kube_node_status_condition", "aggregationType": 4, "namespace": "microsoft.containerservice/managedclusters", "metricVisualization": { "displayName": "Node Conditions" }, "splitBy": "condition" }
+                      ],
+                      "title": "Node Conditions",
+                      "titleKind": 1,
+                      "visualization": { "chartType": 2, "legendVisualization": { "isVisible": true, "position": 2 } }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "position": { "x": 2, "y": 2, "rowSpan": 2, "colSpan": 2 },
+            "metadata": {
+              "type": "Extension/HubsExtension/PartType/MonitorChartPart",
+              "settings": {
+                "content": {
+                  "options": {
+                    "chart": {
+                      "metrics": [
+                        { "resourceMetadata": { "id": "${aks_id}" }, "name": "kube_pod_container_status_restarts", "aggregationType": 1, "namespace": "microsoft.containerservice/managedclusters", "metricVisualization": { "displayName": "Container Restarts" } }
+                      ],
+                      "title": "Container Restarts",
+                      "titleKind": 1,
+                      "visualization": { "chartType": 2, "legendVisualization": { "isVisible": true, "position": 2 } }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "position": { "x": 4, "y": 2, "rowSpan": 2, "colSpan": 2 },
+            "metadata": {
+              "type": "Extension/HubsExtension/PartType/MonitorChartPart",
+              "settings": {
+                "content": {
+                  "options": {
+                    "chart": {
+                      "metrics": [
+                        { "resourceMetadata": { "id": "${aks_id}" }, "name": "kube_node_status_allocatable_pods", "aggregationType": 4, "namespace": "microsoft.containerservice/managedclusters", "metricVisualization": { "displayName": "Allocatable Pods" } },
+                        { "resourceMetadata": { "id": "${aks_id}" }, "name": "kube_pod_status_phase", "aggregationType": 4, "namespace": "microsoft.containerservice/managedclusters", "metricVisualization": { "displayName": "Running Pods" }, "whereClause": "phase='Running'" }
+                      ],
+                      "title": "Pod Capacity vs Running",
+                      "titleKind": 1,
+                      "visualization": { "chartType": 2, "legendVisualization": { "isVisible": true, "position": 2 } }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "position": { "x": 6, "y": 2, "rowSpan": 2, "colSpan": 2 },
+            "metadata": {
+              "type": "Extension/HubsExtension/PartType/MonitorChartPart",
+              "settings": {
+                "content": {
+                  "options": {
+                    "chart": {
+                      "metrics": [
+                        { "resourceMetadata": { "id": "${aks_id}" }, "name": "kube_node_status_allocatable_cpu_cores", "aggregationType": 1, "namespace": "microsoft.containerservice/managedclusters", "metricVisualization": { "displayName": "CPU Usage" }, "splitBy": "node" }
+                      ],
+                      "title": "CPU Usage per Node",
+                      "titleKind": 1,
+                      "visualization": { "chartType": 2, "legendVisualization": { "isVisible": true, "position": 2 } }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "position": { "x": 0, "y": 4, "rowSpan": 2, "colSpan": 4 },
+            "metadata": {
+              "type": "Extension/HubsExtension/PartType/MonitorChartPart",
+              "settings": {
+                "content": {
+                  "options": {
+                    "chart": {
+                      "metrics": [
+                        { "resourceMetadata": { "id": "${agw_id}" }, "name": "ApplicationGatewayTotalRequests", "aggregationType": 1, "namespace": "microsoft.network/applicationgateways", "metricVisualization": { "displayName": "Total Requests" } },
+                        { "resourceMetadata": { "id": "${agw_id}" }, "name": "ApplicationGatewayBlockedCount", "aggregationType": 1, "namespace": "microsoft.network/applicationgateways", "metricVisualization": { "displayName": "Blocked Requests (WAF)" } }
+                      ],
+                      "title": "Application Gateway WAF - Total vs Blocked Requests",
+                      "titleKind": 1,
+                      "visualization": { "chartType": 2, "legendVisualization": { "isVisible": true, "position": 2 } }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "position": { "x": 4, "y": 4, "rowSpan": 2, "colSpan": 4 },
+            "metadata": {
+              "type": "Extension/HubsExtension/PartType/MonitorChartPart",
+              "settings": {
+                "content": {
+                  "options": {
+                    "chart": {
+                      "metrics": [
+                        { "resourceMetadata": { "id": "${agw_id}" }, "name": "ApplicationGatewayResponseStatus", "aggregationType": 4, "namespace": "microsoft.network/applicationgateways", "metricVisualization": { "displayName": "Response Status" }, "splitBy": "ResponseStatus" }
+                      ],
+                      "title": "WAF Response Status Distribution",
+                      "titleKind": 1,
+                      "visualization": { "chartType": 3, "legendVisualization": { "isVisible": true, "position": 2 } }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "position": { "x": 0, "y": 6, "rowSpan": 2, "colSpan": 4 },
+            "metadata": {
+              "type": "Extension/HubsExtension/PartType/MonitorChartPart",
+              "settings": {
+                "content": {
+                  "options": {
+                    "chart": {
+                      "metrics": [
+                        { "resourceMetadata": { "id": "${aks_id}" }, "name": "kube_hpa_status_current_replicas", "aggregationType": 1, "namespace": "microsoft.containerservice/managedclusters", "metricVisualization": { "displayName": "HPA Replicas" }, "splitBy": "horizontalpodautoscaler" }
+                      ],
+                      "title": "HPA Replicas (KEDA + Standard HPA)",
+                      "titleKind": 1,
+                      "visualization": { "chartType": 2, "legendVisualization": { "isVisible": true, "position": 2 } }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "position": { "x": 4, "y": 6, "rowSpan": 2, "colSpan": 4 },
+            "metadata": {
+              "type": "Extension/HubsExtension/PartType/MonitorChartPart",
+              "settings": {
+                "content": {
+                  "options": {
+                    "chart": {
+                      "metrics": [
+                        { "resourceMetadata": { "id": "${defender_id}" }, "name": "SecurityRecommendations", "aggregationType": 4, "namespace": "microsoft.security/assessments", "metricVisualization": { "displayName": "Defender Recommendations" }, "splitBy": "status" }
+                      ],
+                      "title": "Microsoft Defender for Containers - Recommendations",
+                      "titleKind": 1,
+                      "visualization": { "chartType": 3, "legendVisualization": { "isVisible": true, "position": 2 } }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "position": { "x": 0, "y": 8, "rowSpan": 2, "colSpan": 8 },
+            "metadata": {
+              "type": "Extension/HubsExtension/PartType/MonitorGridPart",
+              "settings": {
+                "content": {
+                  "options": {
+                    "grid": {
+                      "columns": [
+                        { "name": "name", "displayName": "Alert Name" },
+                        { "name": "severity", "displayName": "Severity" },
+                        { "name": "time", "displayName": "Time" },
+                        { "name": "status", "displayName": "Status" }
+                      ],
+                      "query": "SecurityAlert | where TimeGenerated > ago(24h) | where AlertType contains 'Kubernetes' or AlertType contains 'Container' | project TimeGenerated=format_datetime(TimeGenerated, 'yyyy-MM-dd HH:mm:ss'), name=AlertDisplayName, severity=AlertSeverity, status=AlertStatus | order by TimeGenerated desc",
+                      "title": "Active Defender Alerts (24h)",
+                      "titleKind": 1
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "model": {
+        "timeRange": {
+          "value": { "relative": { "duration": 24, "timeUnit": 1 } },
+          "type": "relative"
+        },
+        "filterLocale": { "value": "en-us" },
+        "filters": { "value": { "msitm": { "model": "scopeFilter" } } }
+      }
+    }
+  },
+  "id": "/subscriptions/${subscription_id}/resourceGroups/${resource_group}/providers/Microsoft.Portal/dashboards/aks-platform-overview",
+  "name": "aks-platform-overview",
+  "type": "Microsoft.Portal/dashboards",
+  "location": "UK South",
+  "tags": {
+    "hidden-title": "AKS Platform Overview - SecondWave"
+  }
+}
