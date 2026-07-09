@@ -1,0 +1,21 @@
+# ARCHITECTURE DECISION: .tool-versions (asdf) ensures consistent tool versions
+# across all developer and CI environments. This eliminates "works on my machine"
+# issues for Terraform, Kubernetes, and Azure tooling.
+# SECURITY SAFEGUARD: All tool versions are pinned to specific releases. Auto-update
+# channels are not used for security-critical tools.
+
+terraform 1.9.8
+terragrunt 0.67.14
+tflint 0.54.0
+checkov 3.2.360
+kubectl 1.30.6
+helm 3.16.3
+k3d 5.7.5
+azure-cli 2.65.0
+kind 0.24.0
+stern 1.31.0
+k9s 0.32.7
+pre-commit 4.0.1
+infracost 0.10.39
+shellcheck 0.10.0
+go 1.23.4

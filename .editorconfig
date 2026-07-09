@@ -1,0 +1,39 @@
+# ARCHITECTURE DECISION: EditorConfig ensures consistent coding styles across
+# all editors and IDEs. Terraform HCL uses 2-space indentation; Go uses tabs.
+# SECURITY SAFEGUARD: UTF-8 encoding and LF line endings prevent cross-platform
+# encoding issues in CI/CD pipelines.
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{tf,tfvars}]
+indent_style = space
+indent_size = 2
+
+[*.{hcl,json,yaml,yml}]
+indent_style = space
+indent_size = 2
+
+[*.{go,go.mod}]
+indent_style = tab
+indent_size = 4
+
+[*.{md,markdown}]
+trim_trailing_whitespace = false
+
+[*.{sh,bash,zsh}]
+indent_style = space
+indent_size = 2
+
+[*.{ps1,psm1}]
+indent_style = space
+indent_size = 4
+
+[Makefile]
+indent_style = tab
+indent_size = 4

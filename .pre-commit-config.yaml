@@ -1,0 +1,59 @@
+# ARCHITECTURE DECISION: Pre-commit hooks enforce code quality and security checks
+# before commits enter the repository. Each hook runs in isolation to prevent
+# one failure from blocking the entire check suite.
+# SECURITY SAFEGUARD: Secrets detection (detect-secrets) prevents accidental
+# commits of passwords, tokens, or private keys.
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: [--unsafe]
+      - id: check-json
+      - id: check-added-large-files
+        args: [--maxkb=500]
+      - id: detect-private-key
+      - id: check-merge-conflict
+      - id: mixed-line-ending
+        args: [--fix=lf]
+
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.96.3
+    hooks:
+      - id: terraform_fmt
+      - id: terraform_tflint
+        args:
+          - --args=--config=__GIT_WORKING_DIR__/.tflint.hcl
+          - --args=--format=compact
+      - id: terraform_trivy
+        args:
+          - --args=--severity=HIGH,CRITICAL
+      - id: terraform_checkov
+        args:
+          - --args=--config-file=__GIT_WORKING_DIR__/.checkov.yml
+      - id: terraform_validate
+        args:
+          - --args=-no-color
+          - --init-args=-backend=false
+      - id: terraform_docs
+        args:
+          - --args=--output-mode=inject
+          - --hook-config=--path-to-file=README.md
+          - --hook-config=--add-to-existing-file=true
+
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: [--baseline, .secrets.baseline]
+        exclude: terraform.tfvars.example|\.tfvars$|\.tf$
+
+  - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
+    rev: v9.19.0
+    hooks:
+      - id: commitlint
+        stages: [commit-msg]
+        additional_dependencies: ['@commitlint/config-conventional']

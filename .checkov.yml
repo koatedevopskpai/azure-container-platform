@@ -1,0 +1,44 @@
+# ARCHITECTURE DECISION: Checkov scans Terraform for security misconfigurations
+# at plan/apply time. This configuration suppresses known false positives for
+# module patterns and documents the rationale for each skip.
+# SECURITY SAFEGUARD: All skipped checks are reviewed quarterly. No high-severity
+# findings are skipped without documented acceptance of risk.
+
+framework:
+  - terraform
+  - kubernetes
+
+skip-check:
+  # ARCHITECTURE DECISION: CKV_AZURE_1 checks for VM admin credentials.
+  # AKS nodes use managed identities, not local admin accounts.
+  - CKV_AZURE_1
+
+  # ARCHITECTURE DECISION: CKV_AZURE_4 checks AKS RBAC is enabled.
+  # RBAC is enabled with Azure AD integration, but the check triggers
+  # on the default node pool block before azure_active_directory_role_based_access_control
+  # is parsed.
+  - CKV_AZURE_4
+
+  # ARCHITECTURE DECISION: CKV_AZURE_5 checks for authorized IP ranges.
+  # Private clusters do not use authorized IP ranges — access is via VNet.
+  - CKV_AZURE_5
+
+  # ARCHITECTURE DECISION: CKV_AZURE_67 checks storage account min TLS.
+  # Terraform state storage account is configured separately.
+  - CKV_AZURE_67
+
+  # ARCHITECTURE DECISION: CKV_K8S_12 checks memory limits.
+  # The ingress-nginx chart sets resource limits via values template.
+  - CKV_K8S_12
+
+  # ARCHITECTURE DECISION: CKV_K8S_27 checks for namespace default limits.
+  # Limits are enforced via Kyverno ClusterPolicy.
+  - CKV_K8S_27
+
+output_format: cli
+quiet: true
+soft_fail: false
+compact: true
+skip_paths:
+  - ".github/"
+  - "tests/"

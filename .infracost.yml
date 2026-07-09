@@ -1,0 +1,53 @@
+# ARCHITECTURE DECISION: Infracost estimates cloud costs from Terraform plans.
+# This configuration defines cost profiles per environment and sets budget alerts
+# for cost anomalies.
+# SECURITY SAFEGUARD: Cost estimates are validated in CI to prevent unexpected
+# cost increases from infrastructure changes.
+
+version: 0.1
+
+projects:
+  - path: .
+    name: aks-platform
+    usage_file: .infracost-usage.yml
+
+  - path: modules/aks-cluster
+    name: aks-cluster
+    usage_file: modules/aks-cluster/.infracost-usage.yml
+
+  - path: modules/aks-node-pools
+    name: aks-node-pools
+    usage_file: modules/aks-node-pools/.infracost-usage.yml
+
+  - path: modules/addons
+    name: addons
+    usage_file: modules/addons/.infracost-usage.yml
+
+output_format:
+  - table
+  - json
+  - html
+
+currency: GBP
+
+terraform_cloud_token: ""
+
+# Cost estimates assume UK pricing
+pricing_api_endpoint: https://pricing.api.infracost.io
+
+percentage_threshold: 5
+
+usage_file:
+  # Estimated usage profiles per environment
+  dev:
+    node_pool_hours: 2190  # 3 months
+    storage_gb: 128
+    network_gb: 100
+  staging:
+    node_pool_hours: 4380
+    storage_gb: 256
+    network_gb: 500
+  production:
+    node_pool_hours: 8760
+    storage_gb: 512
+    network_gb: 2000
