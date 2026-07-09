@@ -1,0 +1,34 @@
+# ARCHITECTURE DECISION: Virtual Kubelet enables AKS cluster to burst pods to Azure
+# Container Instances (ACI) during demand spikes. This is particularly useful for
+# event-driven workloads scaled by KEDA.
+# SECURITY SAFEGUARD: Virtual Kubelet uses the cluster's managed identity for ACI
+# management. Pods scheduled to the virtual node must tolerate the virtual-kubelet
+# taint and cannot use host networking or privileged containers.
+
+provider: azure
+
+providers:
+  azure:
+    clusterName: ${cluster_name}
+    resourceGroup: ${resource_group}
+    location: ${location}
+    useManagedIdentity: true
+
+nodeSelector:
+  kubernetes.io/role: agent
+
+nodeToleration:
+  - key: virtual-kubelet.io/provider
+    operator: Exists
+
+metrics:
+  enabled: true
+  port: 10255
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi

@@ -1,0 +1,51 @@
+# ARCHITECTURE DECISION: ExternalDNS uses Azure DNS with Workload Identity for
+# authentication. It watches Ingress and Service resources and automatically
+# creates DNS records in the managed Azure DNS zone.
+# SECURITY SAFEGUARD: ExternalDNS is scoped via --domain-filter to only manage
+# records within the specified domain, preventing accidental DNS record changes
+# outside the controlled zone.
+
+provider: azure-dns
+
+azure:
+  resourceGroup: ${domain}
+  tenantId: ${tenant_id}
+  subscriptionId: ""
+  useWorkloadIdentity: true
+
+domainFilters:
+  - ${domain}
+
+sources:
+  - ingress
+  - service
+
+txtOwnerId: "${domain}-owner"
+txtPrefix: "_external_dns_"
+
+policy: sync
+registry: txt
+
+interval: 1m
+
+logLevel: info
+
+replicaCount: 2
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+metrics:
+  enabled: ${enable_telemetry}
+  serviceMonitor:
+    enabled: ${enable_telemetry}
+
+podSecurityContext:
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
