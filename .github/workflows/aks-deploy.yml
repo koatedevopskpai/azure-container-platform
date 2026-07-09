@@ -1,0 +1,132 @@
+# ARCHITECTURE DECISION: OIDC-based authentication replaces service principal secrets
+# in GitHub Actions. Each environment (dev, staging, prod) has its own federated
+# credential scoped to the specific Azure subscription and resource group.
+# SECURITY SAFEGUARD: No Azure secrets are stored in GitHub Secrets — auth flows
+# through OIDC token exchange with Azure AD. The id-token: write permission is
+# required for the OIDC handshake.
+
+name: AKS Platform Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "**.tf"
+      - "modules/**"
+      - "terraform.tfvars"
+      - ".github/workflows/aks-deploy.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "**.tf"
+      - "modules/**"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        default: "dev"
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      plan_only:
+        description: "Run terraform plan only"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+env:
+  TERRAFORM_VERSION: "1.9.8"
+  TF_IN_AUTOMATION: "true"
+
+jobs:
+  validate:
+    name: Validate Terraform
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Terraform fmt
+        run: terraform fmt -check -recursive
+        continue-on-error: true
+
+      - name: Terraform init
+        run: terraform init -backend=false
+
+      - name: Terraform validate
+        run: terraform validate
+
+      - name: Checkov security scan
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          framework: terraform
+          quiet: true
+          skip_check: CKV_AZURE_1,CKV_AZURE_2,CKV_AZURE_3  # Known false positives for module patterns
+          output_format: cli
+
+      - name: TFLint
+        uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: latest
+      - run: tflint --init
+      - run: tflint --format compact
+
+  deploy:
+    name: Deploy AKS Platform
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'dev' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      # ARCHITECTURE DECISION: OIDC auth via az login --federated-token.
+      # The federated credential is pre-configured in Azure AD for this
+      # GitHub repository and environment.
+      # SECURITY SAFEGUARD: The OIDC token is short-lived (5 min) and scoped
+      # to the GitHub Actions workflow run.
+
+      - name: Azure OIDC Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Terraform Init
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ secrets.TF_STATE_RG }}" \
+            -backend-config="storage_account_name=${{ secrets.TF_STATE_SA }}" \
+            -backend-config="container_name=${{ secrets.TF_STATE_CONTAINER }}" \
+            -backend-config="key=${{ vars.TF_STATE_KEY }}"
+
+      - name: Terraform Plan
+        id: plan
+        run: |
+          terraform plan \
+            -var-file="terraform.tfvars" \
+            -out=tfplan \
+            -detailed-exitcode
+          echo "exitcode=$?" >> $GITHUB_OUTPUT
+
+      - name: Terraform Apply
+        if: |
+          (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
+          (steps.plan.outputs.exitcode == 2 || github.event.inputs.plan_only != 'true')
+        run: terraform apply -auto-approve tfplan

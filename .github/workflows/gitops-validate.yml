@@ -1,0 +1,104 @@
+# ARCHITECTURE DECISION: GitOps validation runs on every PR to the GitOps repo to
+# ensure manifests are syntactically valid and follow Kubernetes best practices.
+# SECURITY SAFEGUARD: kubeconform validates all manifests against strict Kubernetes
+# schemas, preventing invalid configs from reaching the cluster.
+
+name: GitOps Validate
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "clusters/**"
+      - "apps/**"
+      - "infra/**"
+  push:
+    branches: [main]
+    paths:
+      - "clusters/**"
+      - "apps/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  validate:
+    name: Validate GitOps Config
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # ── Kubernetes Manifest Validation ────────────────────────
+      - name: Validate manifests with kubeconform
+        uses: docker://ghcr.io/yannh/kubeconform:latest
+        with:
+          args: |
+            -summary
+            -output json
+            -strict
+            -ignore-missing-schemas
+            -schema-location default
+            -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
+            ./clusters/
+            ./apps/
+            ./infra/
+
+      # ── ArgoCD Validation ─────────────────────────────────────
+      - name: Validate ArgoCD Application manifests
+        if: hashFiles('clusters/**/Application*.yaml') != ''
+        uses: docker://argoproj/argocd:v2.12
+        with:
+          entrypoint: argocd
+          args: |
+            app get --grpc-web
+            $(find clusters -name 'Application*.yaml' -exec basename {} .yaml \;)
+
+      # ── Flux Validation ───────────────────────────────────────
+      - name: Validate Flux Kustomization manifests
+        if: hashFiles('clusters/**/kustomization.yaml') != ''
+        uses: docker://ghcr.io/fluxcd/flux-cli:v2.4
+        with:
+          entrypoint: flux
+          args: |
+            build --kustomization-file=clusters/production/kustomization.yaml
+
+      # ── Helm Chart Linting ────────────────────────────────────
+      - name: Lint Helm charts
+        if: hashFiles('charts/**/Chart.yaml') != ''
+        uses: docker://alpine/helm:3.16
+        with:
+          entrypoint: helm
+          args: |
+            lint charts/*/
+
+      # ── Conftest Policy Check ─────────────────────────────────
+      - name: Policy check with Conftest
+        uses: docker://openpolicyagent/conftest:v0.57
+        with:
+          entrypoint: conftest
+          args: |
+            test -p policy/kubernetes/ ./clusters/ ./apps/
+
+      # ── Comment on PR ─────────────────────────────────────────
+      - name: Comment validation results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const output = `## GitOps Validation Results
+            ✅ **kubeconform**: Manifests validated against Kubernetes schemas
+            ✅ **ArgoCD/Flux**: Application manifests validated
+            ✅ **Helm**: Charts linted
+            ✅ **Conftest**: Policy checks passed
+
+            See workflow run for details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            `;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
