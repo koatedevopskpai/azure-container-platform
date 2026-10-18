@@ -1,7 +1,7 @@
 # Azure Container Platform — AKS + GitOps
 
-> **Enterprise-grade Kubernetes platform for the SecondWave insurance migration.**
-> UK Financial Services compliant (FCA/PRA), built with Azure native services,
+> **Kubernetes platform for the SecondWave insurance migration scenario.**
+> Designed around FCA/PRA-aligned controls (design intent; not assessed), built with Azure native services,
 > eBPF networking, and keyless authentication.
 
 ---
